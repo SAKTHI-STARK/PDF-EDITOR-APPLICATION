@@ -43,6 +43,10 @@ def select_multiple_file():
 def select_file():
     file_path = filedialog.askopenfilename()
     return file_path
+def destroy_fun():
+    for widget in window.winfo_children():
+                widget.destroy()
+    pass
 # Function for select the directory
 def save_file():
     file_path = filedialog.asksaveasfilename(
@@ -57,8 +61,7 @@ def savefile(pdf_writer):
     if output_path: 
         with open(output_path, 'wb') as output_file: 
             pdf_writer.write(output_file)
-            for widget in window.winfo_children():
-                widget.destroy()
+            destroy_fun()
             Header_font = Font(size=22, weight='bold')
             Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
             Header.pack()
@@ -179,6 +182,10 @@ def main_window(Name_app, author_name):
     author_name.place_forget()
     window.geometry("600x400")
     window.configure(bg="black")
+    def back():
+        destroy_fun()
+        main_window_elements()
+
     def main_window_elements():
         Header_font = Font(size=22, weight='bold')
         Header = tk.Label(window, text="PDF EDITOR", fg="aqua", background="black", font=Header_font)
@@ -192,9 +199,9 @@ def main_window(Name_app, author_name):
         Button_merge.pack(pady=20)
         Button_add_pages = Button(window, text="Add PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda: remove_elements(Button_split, Button_merge, Button_add_pages, Button_i2p, Header, "add_pages"))
         Button_add_pages.pack(pady=20)
+        button_home = Button(window, text="Home", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=5, height=1, command=back)
+        button_home.place(x=10,y=5)
     main_window_elements()
-def back():
-    main_window(App_name,author_name)
 # Function for loading window
 def loading_window():
     global App_name
