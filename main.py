@@ -82,7 +82,7 @@ def show_preview(file, button):
     canvas.create_window((0, 0), window=image_frame, anchor="nw") 
     # Add a label
     label = tk.Label(image_frame, text="No files selected", background="black", fg="white", font=("Helvetica", 12))
-    label.grid(row=0, column=0, columnspan=5, pady=10)
+    label.grid(row=0, column=5, columnspan=4, pady=10)
     row, col = 1, 0
     for file_path in file:
         try:
@@ -127,11 +127,11 @@ def split_pdf():
     def get_page_vals(file, num_pages):
         Start_page = tk.Label(window, text="Start Pg No:", background="black", fg="aqua")
         Start_page.pack()
-        start_page_val = tk.Entry(window)
+        start_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove")
         start_page_val.pack()
         End_page = tk.Label(window, text="End Page No:", background="black", fg="aqua")
         End_page.pack()
-        End_page_val = tk.Entry(window)
+        End_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove")
         End_page_val.pack()
         button_font = Font(size=10, weight='bold')
         button_convert = Button(window, text="Split File", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda: split_pdf_command(file, start_page_val, End_page_val, num_pages))
