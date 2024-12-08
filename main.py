@@ -15,13 +15,12 @@ def create_static_directory():
         print(f"Directory '{directory}' created")
     else:
         print(f"Directory '{directory}' already exists")
-# Call the function to create the static directory
 create_static_directory()
-
 # Defining globally accessible variables
 window = tk.Tk()
-
-# Function for removing widgets
+global App_name
+global author_name
+# Function for removing widgets and entering into specific action
 def remove_elements(split_button, merge_button, add_button, i2p_button, header, text):
     split_button.destroy()
     merge_button.destroy()
@@ -36,18 +35,15 @@ def remove_elements(split_button, merge_button, add_button, i2p_button, header, 
         pass
     elif text == "add_pages":
         pass
-
 # Function for selecting multiple files
 def select_multiple_file():
     file_path = list(filedialog.askopenfilenames())
     return file_path
-
 # Function for selecting a single file
 def select_file():
     file_path = filedialog.askopenfilename()
     return file_path
-
-# Function for saving the output file
+# Function for select the directory
 def save_file():
     file_path = filedialog.asksaveasfilename(
         title="Save As",
@@ -55,13 +51,19 @@ def save_file():
         filetypes=[("PDF Files", ".pdf"), ("All Files", ".*")]
     )
     return file_path
-
+#function to save the output file
 def savefile(pdf_writer): 
     output_path = save_file() 
     if output_path: 
         with open(output_path, 'wb') as output_file: 
             pdf_writer.write(output_file)
-
+            for widget in window.winfo_children():
+                widget.destroy()
+            Header_font = Font(size=22, weight='bold')
+            Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
+            Header.pack()
+            file_saved= tk.Label(window, text="SUCCESFULLY SPLIT FILE", background="black", fg="yellow",font=Header_font)
+            file_saved.pack()
 #function for showing the preview pages of the df file and images
 def show_preview(file, button):
     button.destroy()
@@ -116,41 +118,37 @@ def show_preview(file, button):
                 return len(pdf_document)
         except Exception as e:
             label.config(text=f"Error loading file: {e}")
-
 # Function for splitting PDF files
 def split_pdf():
     def split_selection(button):
         file = select_file()
         num_pages = show_preview([file], button)
         get_page_vals(file, num_pages)
-
+    #function that used to get the spliting page values
     def get_page_vals(file, num_pages):
         Start_page = tk.Label(window, text="Start Pg No:", background="black", fg="aqua")
         Start_page.pack()
-        start_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove")
+        start_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove",insertbackground="grey")
         start_page_val.pack()
         End_page = tk.Label(window, text="End Page No:", background="black", fg="aqua")
         End_page.pack()
-        End_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove")
+        End_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove",insertbackground="grey")
         End_page_val.pack()
         button_font = Font(size=10, weight='bold')
         button_convert = Button(window, text="Split File", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda: split_pdf_command(file, start_page_val, End_page_val, num_pages))
         button_convert.pack(pady=20)
-
+    #function that get the values from the split file page
     def split_pdf_command(file, start_page_val, End_page_val, num_pages):
-        st_pg_val = int(start_page_val.get())
-        end_pg_val = int(End_page_val.get())
-        if end_pg_val <= num_pages:
-            operations(file, st_pg_val, end_pg_val)
-        else:
-            messagebox.showwarning("Invalid Input", "Enter a valid page range")
-        for widget in window.winfo_children():
-            widget.destroy()
-        Header_font = Font(size=22, weight='bold')
-        Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
-        Header.pack()
-        file_saved= tk.Label(window, text="SUCCESFULLY SPLIT FILE", background="black", fg="yellow",font=Header_font)
-        file_saved.pack()
+        try:
+            st_pg_val = int(start_page_val.get())
+            end_pg_val = int(End_page_val.get())
+            if end_pg_val <= num_pages:
+                    operations(file, st_pg_val, end_pg_val)
+            else:
+                messagebox.showwarning("Invalid Input", "Enter a valid range")
+        except:
+            messagebox.showwarning("invalid input","Enter valid type-int")
+    #function that run for selecting split pdf button from the home menu
     def split_pdf_main_window():
         Header_font = Font(size=22, weight='bold')
         Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
@@ -158,7 +156,7 @@ def split_pdf():
         button_font = Font(size=10, weight='bold')
         Button_select_file = Button(window, text="Select PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda: split_selection(Button_select_file))
         Button_select_file.pack(pady=20)
-
+    #function contains operations for split the pdf file
     def operations(input_pdf, start_page, end_page):
         pdf_writer = PyPDF2.PdfWriter()
         # Ensure input_pdf is a file path or file-like object
@@ -174,9 +172,7 @@ def split_pdf():
             pdf_writer.add_page(page)
         # Save the newly created PDF file
         savefile(pdf_writer)
-
     split_pdf_main_window()
-
 # Function to create the main window to display all functionalities
 def main_window(Name_app, author_name):
     Name_app.place_forget()
@@ -197,9 +193,12 @@ def main_window(Name_app, author_name):
         Button_add_pages = Button(window, text="Add PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda: remove_elements(Button_split, Button_merge, Button_add_pages, Button_i2p, Header, "add_pages"))
         Button_add_pages.pack(pady=20)
     main_window_elements()
-
+def back():
+    main_window(App_name,author_name)
 # Function for loading window
 def loading_window():
+    global App_name
+    global author_name
     window.geometry("400x200")
     window.configure(bg="black")
     window.title("PDF-EDITOR")
@@ -211,5 +210,4 @@ def loading_window():
     author_name.place(x=230, y=110)
     window.after(700, lambda: main_window(App_name, author_name))
     window.mainloop()
-
 loading_window()
