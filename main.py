@@ -30,7 +30,7 @@ def remove_elements(split_button, merge_button, add_button, i2p_button, header, 
     if text == "split_pdf":
         split_pdf()
     elif text == "i2p":
-        pass
+        convert_img2pdf()
     elif text == "merge_pdf":
         pass
     elif text == "add_pages":
@@ -45,8 +45,21 @@ def select_file():
     return file_path
 def destroy_fun():
     for widget in window.winfo_children():
-                widget.destroy()
-    pass
+        try:
+            button_text = widget.cget("text")
+            if button_text == "Home":
+                continue
+        except tk.TclError:
+            # Handle widgets that do not have a 'text' attribute
+            pass
+        widget.destroy()
+def final_window():
+    destroy_fun()
+    Header_font = Font(size=22, weight='bold')
+    Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
+    Header.pack()
+    file_saved= tk.Label(window, text="SUCCESFULLY SPLIT FILE", background="black", fg="yellow",font=Header_font)
+    file_saved.pack()      
 # Function for select the directory
 def save_file():
     file_path = filedialog.asksaveasfilename(
@@ -61,45 +74,44 @@ def savefile(pdf_writer):
     if output_path: 
         with open(output_path, 'wb') as output_file: 
             pdf_writer.write(output_file)
-            destroy_fun()
-            Header_font = Font(size=22, weight='bold')
-            Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
-            Header.pack()
-            file_saved= tk.Label(window, text="SUCCESFULLY SPLIT FILE", background="black", fg="yellow",font=Header_font)
-            file_saved.pack()
+            final_window()
 #function for showing the preview pages of the df file and images
-def show_preview(file, button):
+def show_preview(files, button):
     button.destroy()
     # Create a frame for the content
-    frame = tk.Frame(window, background="black", bd=0) 
-    frame.pack(fill=BOTH, expand=True) 
-    # Add a canvas for scrolling 
-    canvas = tk.Canvas(frame, background="black", bd=0, highlightthickness=0) 
-    canvas.pack(side=LEFT, fill=BOTH, expand=True) 
-    # Add a scrollbar 
-    scrollbar = tk.Scrollbar(frame, orient=VERTICAL, command=canvas.yview, background="black", bd=0, highlightthickness=0) 
-    scrollbar.pack(side=RIGHT, fill=Y) 
-    # Configure the canvas 
-    canvas.configure(yscrollcommand=scrollbar.set) 
-    canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all"))) 
-    # Create a frame inside the canvas 
-    image_frame = tk.Frame(canvas, background="black", bd=0, highlightthickness=0) 
-    canvas.create_window((0, 0), window=image_frame, anchor="nw") 
+    frame = tk.Frame(window, background="black", bd=0)
+    frame.pack(fill=BOTH, expand=True)
+    # Add a canvas for scrolling
+    canvas = tk.Canvas(frame, background="black", bd=0, highlightthickness=0)
+    canvas.pack(side=LEFT, fill=BOTH, expand=True)
+    # Add a scrollbar
+    scrollbar = tk.Scrollbar(frame, orient=VERTICAL, command=canvas.yview, background="black", bd=0, highlightthickness=0)
+    scrollbar.pack(side=RIGHT, fill=Y)
+    # Configure the canvas
+    canvas.configure(yscrollcommand=scrollbar.set)
+    canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+    # Create a frame inside the canvas
+    image_frame = tk.Frame(canvas, background="black", bd=0, highlightthickness=0)
+    canvas.create_window((0, 0), window=image_frame, anchor="nw")
     # Add a label
     label = tk.Label(image_frame, text="No files selected", background="black", fg="white", font=("Helvetica", 12))
     label.grid(row=0, column=5, columnspan=4, pady=10)
     row, col = 1, 0
-    for file_path in file:
+    for file_path in files:
         try:
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
                 image = Image.open(file_path)
                 image = image.resize((100, 100), Image.LANCZOS)
                 photo = ImageTk.PhotoImage(image)
-                image_label = tk.Label(image_frame, image=photo, background="black")
+                image_label = tk.Label(image_frame, image=photo, background="black", bd=0, highlightthickness=0)
                 image_label.image = photo
                 image_label.grid(row=row, column=col, padx=5, pady=5)
-                file_name_label = tk.Label(image_frame, text=os.path.basename(file_path), font=("Helvetica", 10), background="black", fg="aqua")
+                file_name_label = tk.Label(image_frame, text=os.path.basename(file_path), font=("Helvetica", 10), background="black", fg="aqua", bd=0, highlightthickness=0)
                 file_name_label.grid(row=row+1, column=col, padx=5, pady=5)
+                col += 1
+                if col >= 13:  # Change this value to adjust the number of columns
+                    col = 0
+                    row += 2
             elif file_path.lower().endswith('.pdf'):
                 pdf_document = fitz.open(file_path)
                 label.config(text=f"{os.path.basename(file_path)}", background="black", fg="aqua")
@@ -176,6 +188,18 @@ def split_pdf():
         # Save the newly created PDF file
         savefile(pdf_writer)
     split_pdf_main_window()
+def convert_img2pdf():
+    def image_selection(button):
+        file = select_multiple_file()
+        
+    def img_select_main_window():
+        Header_font = Font(size=22, weight='bold')
+        Header = tk.Label(window, text="IMAGE TO PDF", fg="aqua", background="black", font=Header_font)
+        Header.pack()
+        button_font = Font(size=10, weight='bold')
+        Button_select_file = Button(window, text="Select images", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:image_selection(Button_select_file))
+        Button_select_file.pack(pady=20)
+    img_select_main_window() 
 # Function to create the main window to display all functionalities
 def main_window(Name_app, author_name):
     Name_app.place_forget()
