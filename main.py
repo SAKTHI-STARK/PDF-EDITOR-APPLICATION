@@ -16,6 +16,12 @@ def create_static_directory():
     else:
         print(f"Directory '{directory}' already exists")
 create_static_directory()
+#function for deleting static folder
+def delete_directory():
+    try:
+        os.rmdir(r"D:\personal\projects\PDF-EDITOR-APPLICATION\static")
+    except OSError as e:
+        print(f"Error deleting directory: {e}")
 # Defining globally accessible variables
 window = tk.Tk()
 global App_name
@@ -74,6 +80,7 @@ def savefile(pdf_writer):
     if output_path: 
         with open(output_path, 'wb') as output_file: 
             pdf_writer.write(output_file)
+            delete_directory()
             final_window()
 #function for showing the preview pages of the df file and images
 def show_preview(files, button):
