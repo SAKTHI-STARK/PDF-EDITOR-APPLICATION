@@ -40,7 +40,7 @@ def remove_elements(split_button, merge_button, add_button, i2p_button, header, 
     elif text == "i2p":
         convert_img2pdf()
     elif text == "merge_pdf":
-        pass
+        merge_pdf()
     elif text == "add_pages":
         pass
 # Function for selecting multiple files
@@ -61,6 +61,7 @@ def destroy_fun():
             # Handle widgets that do not have a 'text' attribute
             pass
         widget.destroy()
+#function for showing final window after successfull complete the operation
 def final_window():
     destroy_fun()
     Header_font = Font(size=22, weight='bold')
@@ -84,6 +85,30 @@ def savefile():
             pdf_writer.write(output_file)
             delete_directory()
             final_window()
+def show_front_page():
+    # Create a frame to display the PDF front pages
+    image_frame = tk.Frame(window,background="black", bd=0)
+    image_frame.pack(fill=tk.BOTH, expand=True)
+    file_paths = filedialog.askopenfilenames(filetypes=[("PDF files", "*.pdf")])
+    if file_paths:
+        for widget in image_frame.winfo_children():
+            widget.destroy()  # Clear previous images
+        row, col = 0, 0
+        for file_path in file_paths:
+            pdf_document = fitz.open(file_path)
+            page = pdf_document.load_page(0)  # Load the first page
+            pix = page.get_pixmap()
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            img = img.resize((150, 200), Image.LANCZOS)  # Resize the image to fit the window
+            photo = ImageTk.PhotoImage(img)
+            image_label = tk.Label(image_frame, image=photo)
+            image_label.image = photo
+            image_label.grid(row=row, column=col, padx=5, pady=5)
+            col += 1
+            if col >= 5:  # Adjust the number of columns as needed
+                col = 0
+                row += 1
+    return file_paths
 #function for showing the preview pages of the df file and images
 def show_preview(files, button):
     button.destroy()
@@ -119,7 +144,7 @@ def show_preview(files, button):
                 file_name_label = tk.Label(image_frame, text=os.path.basename(file_path), font=("Helvetica", 4), background="black", fg="aqua", bd=0, highlightthickness=0)
                 file_name_label.grid(row=row+1, column=col, padx=5, pady=5)
                 col += 1
-                if col >= 13:  # Change this value to adjust the number of columns
+                if col >= 13:  
                     col = 0
                     row += 2
             elif file_path.lower().endswith('.pdf'):
@@ -137,7 +162,7 @@ def show_preview(files, button):
                     file_name_label = tk.Label(image_frame, text=f"Page {page_num+1}", background="black", fg="aqua", font=("Helvetica", 10))
                     file_name_label.grid(row=row+1, column=col, padx=5, pady=5)
                     col += 1
-                    if col >= 13:  # Change this value to adjust the number of columns
+                    if col >= 13:  
                         col = 0
                         row += 2
                 return len(pdf_document)
@@ -183,7 +208,6 @@ def split_pdf():
         Button_select_file.pack(pady=20)
     #function contains operations for split the pdf file
     def operations(input_pdf, start_page, end_page):
-        
         # Ensure input_pdf is a file path or file-like object
         if isinstance(input_pdf, str):
             pdf_reader = PyPDF2.PdfReader(input_pdf)
@@ -198,7 +222,9 @@ def split_pdf():
         # Save the newly created PDF file
         savefile()
     split_pdf_main_window()
+#main function for image to pdf convertioin
 def convert_img2pdf():
+    #contain the operation to convert image
     def operations(file):
         save_dir=save_file()
         with open(save_dir,'ab') as f:
@@ -206,12 +232,14 @@ def convert_img2pdf():
             f.write(i2p.convert(file,page_size=page_size))
             delete_directory()
             final_window()
+    #contain the preview window of image to pdf
     def image_selection(button):
         file = select_multiple_file()
         show_preview(file,button)
         button_font = Font(size=10, weight='bold')
         button_convert = Button(window, text="CONVERT TO PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:operations(file))
         button_convert.pack(pady=20)
+    #contain the window of image to pdf
     def img_select_main_window():
         Header_font = Font(size=22, weight='bold')
         Header = tk.Label(window, text="IMAGE TO PDF", fg="aqua", background="black", font=Header_font)
@@ -219,13 +247,42 @@ def convert_img2pdf():
         button_font = Font(size=10, weight='bold')
         Button_select_file = Button(window, text="Select images", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:image_selection(Button_select_file))
         Button_select_file.pack(pady=20)
-    img_select_main_window() 
+    img_select_main_window()
+#function for creating merge pdf documents
+def merge_pdf():
+    #functionalities for merging document
+    def operations(pdf_list):
+        print(pdf_list)
+        pdf_merger = PyPDF2.PdfMerger()
+        for pdf in pdf_list:
+            pdf_merger.append(pdf)
+        with open(save_file(), 'wb') as output_file:
+            pdf_merger.write(output_file)
+        delete_directory()
+        final_window()
+    #function for selecting pdf documents
+    def pdf_selection(button):
+        button.destroy()
+        file=show_front_page()
+        button_font = Font(size=10, weight='bold')
+        button_convert = Button(window, text="MERGE PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:operations(file))
+        button_convert.pack(pady=20)
+    #function containing the main merge pdf window elements
+    def pdf_select_main_window():
+        Header_font = Font(size=22, weight='bold')
+        Header = tk.Label(window, text="MERGE PDF", fg="aqua", background="black", font=Header_font)
+        Header.pack()
+        button_font = Font(size=10, weight='bold')
+        Button_select_file = Button(window, text="Select PDF's", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:pdf_selection(Button_select_file))
+        Button_select_file.pack(pady=20)
+    pdf_select_main_window()
 # Function to create the main window to display all functionalities
 def main_window(Name_app, author_name):
     Name_app.place_forget()
     author_name.place_forget()
     window.geometry("600x400")
     window.configure(bg="black")
+    #function for the home button
     def back():
         destroy_fun()
         main_window_elements()
