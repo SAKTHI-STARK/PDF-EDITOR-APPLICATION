@@ -4,9 +4,10 @@ from tkinter import filedialog
 from tkinter.font import Font
 from PIL import Image, ImageTk
 import os
-import fitz  # PyMuPDF
+import fitz  
 from tkinter import messagebox
 import PyPDF2
+import img2pdf as i2p
 # Function to create the static directory if it doesn't exist
 def create_static_directory():
     directory = 'static/'
@@ -26,6 +27,7 @@ def delete_directory():
 window = tk.Tk()
 global App_name
 global author_name
+pdf_writer = PyPDF2.PdfWriter()
 # Function for removing widgets and entering into specific action
 def remove_elements(split_button, merge_button, add_button, i2p_button, header, text):
     split_button.destroy()
@@ -62,9 +64,9 @@ def destroy_fun():
 def final_window():
     destroy_fun()
     Header_font = Font(size=22, weight='bold')
-    Header = tk.Label(window, text="SPLIT PDF", fg="aqua", background="black", font=Header_font)
+    Header = tk.Label(window, text="THANK YOU", fg="aqua", background="black", font=Header_font)
     Header.pack()
-    file_saved= tk.Label(window, text="SUCCESFULLY SPLIT FILE", background="black", fg="yellow",font=Header_font)
+    file_saved= tk.Label(window, text="SUCCESFULLY DONE", background="black", fg="yellow",font=Header_font)
     file_saved.pack()      
 # Function for select the directory
 def save_file():
@@ -75,7 +77,7 @@ def save_file():
     )
     return file_path
 #function to save the output file
-def savefile(pdf_writer): 
+def savefile(): 
     output_path = save_file() 
     if output_path: 
         with open(output_path, 'wb') as output_file: 
@@ -107,13 +109,14 @@ def show_preview(files, button):
     for file_path in files:
         try:
             if file_path.lower().endswith(('.png', '.jpg', '.jpeg', '.gif', '.bmp')):
+                label.config(text="Selected images", background="black", fg="aqua")
                 image = Image.open(file_path)
                 image = image.resize((100, 100), Image.LANCZOS)
                 photo = ImageTk.PhotoImage(image)
                 image_label = tk.Label(image_frame, image=photo, background="black", bd=0, highlightthickness=0)
                 image_label.image = photo
                 image_label.grid(row=row, column=col, padx=5, pady=5)
-                file_name_label = tk.Label(image_frame, text=os.path.basename(file_path), font=("Helvetica", 10), background="black", fg="aqua", bd=0, highlightthickness=0)
+                file_name_label = tk.Label(image_frame, text=os.path.basename(file_path), font=("Helvetica", 4), background="black", fg="aqua", bd=0, highlightthickness=0)
                 file_name_label.grid(row=row+1, column=col, padx=5, pady=5)
                 col += 1
                 if col >= 13:  # Change this value to adjust the number of columns
@@ -180,7 +183,7 @@ def split_pdf():
         Button_select_file.pack(pady=20)
     #function contains operations for split the pdf file
     def operations(input_pdf, start_page, end_page):
-        pdf_writer = PyPDF2.PdfWriter()
+        
         # Ensure input_pdf is a file path or file-like object
         if isinstance(input_pdf, str):
             pdf_reader = PyPDF2.PdfReader(input_pdf)
@@ -193,12 +196,22 @@ def split_pdf():
             page = pdf_reader.pages[page_num]
             pdf_writer.add_page(page)
         # Save the newly created PDF file
-        savefile(pdf_writer)
+        savefile()
     split_pdf_main_window()
 def convert_img2pdf():
+    def operations(file):
+        save_dir=save_file()
+        with open(save_dir,'ab') as f:
+            page_size = (595, 842)
+            f.write(i2p.convert(file,page_size=page_size))
+            delete_directory()
+            final_window()
     def image_selection(button):
         file = select_multiple_file()
-        
+        show_preview(file,button)
+        button_font = Font(size=10, weight='bold')
+        button_convert = Button(window, text="CONVERT TO PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:operations(file))
+        button_convert.pack(pady=20)
     def img_select_main_window():
         Header_font = Font(size=22, weight='bold')
         Header = tk.Label(window, text="IMAGE TO PDF", fg="aqua", background="black", font=Header_font)
@@ -216,7 +229,7 @@ def main_window(Name_app, author_name):
     def back():
         destroy_fun()
         main_window_elements()
-
+    #function for creating main window elements like split pdf,merge pdf
     def main_window_elements():
         Header_font = Font(size=22, weight='bold')
         Header = tk.Label(window, text="PDF EDITOR", fg="aqua", background="black", font=Header_font)
