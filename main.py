@@ -42,7 +42,7 @@ def remove_elements(split_button, merge_button, add_button, i2p_button, header, 
     elif text == "merge_pdf":
         merge_pdf()
     elif text == "add_pages":
-        pass
+        add_pdf()
 # Function for selecting multiple files
 def select_multiple_file():
     file_path = list(filedialog.askopenfilenames())
@@ -193,7 +193,15 @@ def split_pdf():
             st_pg_val = int(start_page_val.get())
             end_pg_val = int(End_page_val.get())
             if end_pg_val <= num_pages:
-                    operations(file, st_pg_val, end_pg_val)
+                def new_window():
+                    destroy_fun()
+                    Header_font = Font(size=22, weight='bold')
+                    Header = tk.Label(window, text="Split Pdf", fg="aqua", background="black", font=Header_font)
+                    Header.pack()
+                    button_font = Font(size=10, weight='bold')
+                    Button_select_file = Button(window, text="Save Pdf", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:operations(file, st_pg_val, end_pg_val))
+                    Button_select_file.pack(pady=20)
+                new_window()
             else:
                 messagebox.showwarning("Invalid Input", "Enter a valid range")
         except:
@@ -236,8 +244,16 @@ def convert_img2pdf():
     def image_selection(button):
         file = select_multiple_file()
         show_preview(file,button)
+        def new_window():
+            destroy_fun()
+            Header_font = Font(size=22, weight='bold')
+            Header = tk.Label(window, text="Image to Pdf", fg="aqua", background="black", font=Header_font)
+            Header.pack()
+            button_font = Font(size=10, weight='bold')
+            Button_select_file = Button(window, text="Save Pdf", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:operations(file))
+            Button_select_file.pack(pady=20)
         button_font = Font(size=10, weight='bold')
-        button_convert = Button(window, text="CONVERT TO PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:operations(file))
+        button_convert = Button(window, text="CONVERT TO PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=new_window)
         button_convert.pack(pady=20)
     #contain the window of image to pdf
     def img_select_main_window():
@@ -264,8 +280,16 @@ def merge_pdf():
     def pdf_selection(button):
         button.destroy()
         file=show_front_page()
+        def new_window():
+            destroy_fun()
+            Header_font = Font(size=22, weight='bold')
+            Header = tk.Label(window, text="Merge Pdf", fg="aqua", background="black", font=Header_font)
+            Header.pack()
+            button_font = Font(size=10, weight='bold')
+            Button_select_file = Button(window, text="Save Pdf", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:operations(file))
+            Button_select_file.pack(pady=20)
         button_font = Font(size=10, weight='bold')
-        button_convert = Button(window, text="MERGE PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:operations(file))
+        button_convert = Button(window, text="MERGE PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=new_window)
         button_convert.pack(pady=20)
     #function containing the main merge pdf window elements
     def pdf_select_main_window():
@@ -274,6 +298,59 @@ def merge_pdf():
         Header.pack()
         button_font = Font(size=10, weight='bold')
         Button_select_file = Button(window, text="Select PDF's", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:pdf_selection(Button_select_file))
+        Button_select_file.pack(pady=20)
+    pdf_select_main_window()
+def add_pdf():
+    global file
+    def operations(file,insert_pdf,position):
+        # Open the source PDF
+        with open(file, 'rb') as source_file:
+            source_reader = PyPDF2.PdfReader(source_file)
+            source_writer = PyPDF2.PdfWriter()
+            # Open the PDF to be inserted
+            with open(insert_pdf, 'rb') as insert_file:
+                insert_reader = PyPDF2.PdfReader(insert_file)
+                # Add pages from the source PDF up to the specified position
+                for i in range(position-1):
+                    source_writer.add_page(source_reader.pages[i])
+                # Add all pages from the insert PDF
+                for page in insert_reader.pages:
+                    source_writer.add_page(page)
+                # Add the remaining pages from the source PDF
+                for i in range(position, len(source_reader.pages)):
+                    source_writer.add_page(source_reader.pages[i])
+            with open(save_file(), 'wb') as output_file:
+                source_writer.write(output_file)
+        delete_directory()
+        final_window()
+    def add_file(file,add_page_val):
+        insert_pdf=select_file()
+        position=int(add_page_val.get())
+        def new_window():
+            destroy_fun()
+            Header_font = Font(size=22, weight='bold')
+            Header = tk.Label(window, text="ADD PAGES", fg="aqua", background="black", font=Header_font)
+            Header.pack()
+            button_font = Font(size=10, weight='bold')
+            Button_select_file = Button(window, text="Save Pdf", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:operations(file,insert_pdf,position))
+            Button_select_file.pack(pady=20)
+        new_window()   
+    def pdf_selection(button):
+        file=select_file()
+        show_preview([file],button)
+        add_page = tk.Label(window, text=" Where to Add file", background="black", fg="aqua")
+        add_page.pack()
+        add_page_val = tk.Entry(window,background="black",fg="aqua",bd=2,relief="groove",insertbackground="grey",)
+        add_page_val.pack()
+        button_font = Font(size=10, weight='bold')
+        button_convert = Button(window, text="ADD PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2, command=lambda:add_file(file,add_page_val))
+        button_convert.pack(pady=20)
+    def pdf_select_main_window():
+        Header_font = Font(size=22, weight='bold')
+        Header = tk.Label(window, text="ADD PAGES", fg="aqua", background="black", font=Header_font)
+        Header.pack()
+        button_font = Font(size=10, weight='bold')
+        Button_select_file = Button(window, text="Select PDF", fg="aqua", background="black", bd=3, relief="groove", font=button_font, width=20, height=2,command=lambda:pdf_selection(Button_select_file))
         Button_select_file.pack(pady=20)
     pdf_select_main_window()
 # Function to create the main window to display all functionalities
