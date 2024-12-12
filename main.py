@@ -8,21 +8,6 @@ import fitz
 from tkinter import messagebox
 import PyPDF2
 import img2pdf as i2p
-# Function to create the static directory if it doesn't exist
-def create_static_directory():
-    directory = 'static/'
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-        print(f"Directory '{directory}' created")
-    else:
-        print(f"Directory '{directory}' already exists")
-create_static_directory()
-#function for deleting static folder
-def delete_directory():
-    try:
-        os.rmdir(r"D:\personal\projects\PDF-EDITOR-APPLICATION\static")
-    except OSError as e:
-        print(f"Error deleting directory: {e}")
 # Defining globally accessible variables
 window = tk.Tk()
 global App_name
@@ -83,7 +68,6 @@ def savefile():
     if output_path: 
         with open(output_path, 'wb') as output_file: 
             pdf_writer.write(output_file)
-            delete_directory()
             final_window()
 def show_front_page():
     # Create a frame to display the PDF front pages
@@ -238,7 +222,6 @@ def convert_img2pdf():
         with open(save_dir,'ab') as f:
             page_size = (595, 842)
             f.write(i2p.convert(file,page_size=page_size))
-            delete_directory()
             final_window()
     #contain the preview window of image to pdf
     def image_selection(button):
@@ -274,7 +257,6 @@ def merge_pdf():
             pdf_merger.append(pdf)
         with open(save_file(), 'wb') as output_file:
             pdf_merger.write(output_file)
-        delete_directory()
         final_window()
     #function for selecting pdf documents
     def pdf_selection(button):
@@ -321,7 +303,6 @@ def add_pdf():
                     source_writer.add_page(source_reader.pages[i])
             with open(save_file(), 'wb') as output_file:
                 source_writer.write(output_file)
-        delete_directory()
         final_window()
     def add_file(file,add_page_val):
         insert_pdf=select_file()
